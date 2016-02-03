@@ -160,7 +160,7 @@ void loop() {
   mqttClient.loop();
   webServer.handleClient();
  
-  if(debouncer.fell()) {
+  if(debouncer.fell() && sounds.size() > 0) {
     currentSoundIndex = currentSoundIndex % sounds.size();
     sounds[currentSoundIndex].toCharArray(convertBuffer, MAX_FILENAME_LENGTH);
     
