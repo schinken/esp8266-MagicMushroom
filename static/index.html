@@ -55,7 +55,7 @@
 	<script>
 		$(function() {
 			var $sounds = $('.sounds');
-			var $soundTpl = $('<tr><td></td><td><form action="/delete" method="POST"><input type="hidden" name="filename"><input type="submit" value="Delete" class="btn btn-danger"></form></td></tr>');
+			var $soundTpl = $('<tr><td></td><td><form action="/delete" method="POST"><input type="hidden" name="index"><input type="submit" value="Delete" class="btn btn-danger"></form></td></tr>');
 
 			$.get('/files', function(result) {
 				$('tr > td', $sounds).remove();
@@ -63,7 +63,7 @@
 				result.forEach(function(element) {
 					var $tpl = $soundTpl.clone();
 					$('td', $tpl).first().text(element.filename);
-					$('input[type="hidden"]', $tpl).attr('value', element.filename);
+					$('input[type="hidden"]', $tpl).attr('value', element.index);
 
 					$sounds.append($tpl);
 				});
