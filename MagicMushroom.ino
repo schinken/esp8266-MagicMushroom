@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "StaticResponse.h"
+#include "config.h"
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define BUTTON_PIN D5
@@ -13,11 +14,6 @@
 #define MAX_FILENAME_LENGTH 100
 
 char convertBuffer[MAX_FILENAME_LENGTH];
-
-const char* ssid     = "backspace.int 2.4ghz";
-const char* password = "-----------";
-const char* mqttHost = "mqtt.core.bckspc.de";
-
 
 WiFiClient wifiClient;
 PubSubClient mqttClient;
