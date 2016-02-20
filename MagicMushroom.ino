@@ -28,6 +28,9 @@ void bootstrapWebServer(void);
 
 void setup() {
 
+  WiFi.hostname("MagicMushroom");
+  WiFi.mode(WIFI_STA);
+
   sounds.push_back("kranplaetze.mp3");
   sounds.push_back("badumtss.mp3");
   sounds.push_back("sad_trumpet.mp3");
