@@ -28,14 +28,12 @@ void bootstrapWebServer(void);
 
 void setup() {
 
-  WiFi.hostname("MagicMushroom");
+  WiFi.hostname("ESP-MagicMushroom");
   WiFi.mode(WIFI_STA);
 
-  sounds.push_back("kranplaetze.mp3");
-  sounds.push_back("badumtss.mp3");
-  sounds.push_back("sad_trumpet.mp3");
-  sounds.push_back("lost_life.mp3");
-  sounds.push_back("i-like-turtles.ogg");
+  sounds.push_back("funes-nein.ogg");
+  sounds.push_back("funes-doch.ogg");
+  sounds.push_back("funes-oh.ogg");
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   
