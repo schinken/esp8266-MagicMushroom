@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <PubSubClient.h>p
+#include <PubSubClient.h>
+#include <ArduinoOTA.h>
 #include <Bounce2.h>
 #include <ArduinoJson.h>
 #include <vector>
@@ -41,6 +42,13 @@ void setup() {
     Serial.print(".");
     delay(500);
   }
+  
+  mqttClient.setClient(wifiClient);
+  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  
+  ArduinoOTA.setHostname(WIFI_HOSTNAME);
+  ArduinoOTA.setPassword(OTA_PASSWORD);
+  ArduinoOTA.begin();
 
   debouncer.attach(BUTTON_PIN);
   debouncer.interval(100);
@@ -138,11 +146,6 @@ void connectMqtt() {
 
 
 void loop() {
-  
-  connectMqtt();
-  debouncer.update();
-  mqttClient.loop();
-  webServer.handleClient();
  
   if(debouncer.fell() && sounds.size() > 0) {
     currentSoundIndex = currentSoundIndex % sounds.size();
@@ -152,4 +155,10 @@ void loop() {
 
     currentSoundIndex++;
   }
+    
+  connectMqtt();
+  debouncer.update();
+  mqttClient.loop();
+  webServer.handleClient();
+  ArduinoOTA.handle();
 }

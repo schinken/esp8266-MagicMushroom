@@ -7,6 +7,8 @@ const char* WIFI_HOSTNAME = "ESP-MagicMushroom";
 const char* WIFI_SSID  = "";
 const char* WIFI_PASSWORD = "";
 
+const char* OTA_PASSWORD = "foobar";
+
 const char* MQTT_HOST = "mqtt.yourdomain";
 const char* MQTT_TOPIC_STATE = "state/misc/magicmushroom";
 const char* MQTT_TOPIC_SOUND = "psa/sound";
