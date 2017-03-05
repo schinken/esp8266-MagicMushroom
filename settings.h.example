@@ -1,0 +1,12 @@
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define BUTTON_PIN D5
+#define MAX_SOUNDS 10
+#define MAX_FILENAME_LENGTH 100
+
+const char* WIFI_HOSTNAME = "ESP-MagicMushroom";
+const char* WIFI_SSID  = "";
+const char* WIFI_PASSWORD = "";
+
+const char* MQTT_HOST = "mqtt.yourdomain";
+const char* MQTT_TOPIC_STATE = "state/misc/magicmushroom";
+const char* MQTT_TOPIC_SOUND = "psa/sound";

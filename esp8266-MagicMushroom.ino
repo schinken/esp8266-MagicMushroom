@@ -1,17 +1,12 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <PubSubClient.h>
+#include <PubSubClient.h>p
 #include <Bounce2.h>
 #include <ArduinoJson.h>
 #include <vector>
 
 #include "StaticResponse.h"
-#include "config.h"
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#define BUTTON_PIN D5
-#define MAX_SOUNDS 10
-#define MAX_FILENAME_LENGTH 100
+#include "settings.h"
 
 char convertBuffer[MAX_FILENAME_LENGTH];
 
@@ -28,7 +23,7 @@ void bootstrapWebServer(void);
 
 void setup() {
 
-  WiFi.hostname("ESP-MagicMushroom");
+  WiFi.hostname(WIFI_HOSTNAME);
   WiFi.mode(WIFI_STA);
 
   sounds.push_back("funes-nein.ogg");
@@ -40,20 +35,12 @@ void setup() {
   Serial.begin(115200);
   delay(10);
 
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
 
   debouncer.attach(BUTTON_PIN);
   debouncer.interval(100);
@@ -139,13 +126,13 @@ void bootstrapWebServer() {
 }
 
 void connectMqtt() {
-
   while (!mqttClient.connected()) {
-    mqttClient.setClient(wifiClient);
-    mqttClient.setServer(mqttHost, 1883);
-    mqttClient.connect("magicPushButton");
-    
-    delay(1000);
+    if (mqttClient.connect(WIFI_HOSTNAME, MQTT_TOPIC_STATE, 1, true, "disconnected")) {
+      mqttClient.publish(MQTT_TOPIC_STATE, "connected", true);
+    } else {
+      Serial.println("MQTT connect failed!");
+      delay(1000);
+    }
   }
 }
 
@@ -161,7 +148,7 @@ void loop() {
     currentSoundIndex = currentSoundIndex % sounds.size();
     sounds[currentSoundIndex].toCharArray(convertBuffer, MAX_FILENAME_LENGTH);
     
-    mqttClient.publish("psa/sound", convertBuffer);
+    mqttClient.publish(MQTT_TOPIC_SOUND, convertBuffer);
 
     currentSoundIndex++;
   }
