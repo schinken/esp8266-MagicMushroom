@@ -2,6 +2,7 @@
 #include <ESP8266WebServer.h>
 #include <PubSubClient.h>
 #include <ArduinoOTA.h>
+#include <EEPROM.h>
 #include <Bounce2.h>
 #include <ArduinoJson.h>
 #include <vector>
@@ -27,9 +28,7 @@ void setup() {
   WiFi.hostname(WIFI_HOSTNAME);
   WiFi.mode(WIFI_STA);
 
-  sounds.push_back("funes-nein.ogg");
-  sounds.push_back("funes-doch.ogg");
-  sounds.push_back("funes-oh.ogg");
+  eepromRead();
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   
@@ -44,7 +43,7 @@ void setup() {
   }
   
   mqttClient.setClient(wifiClient);
-  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  mqttClient.setServer(MQTT_HOST, 1883);
   
   ArduinoOTA.setHostname(WIFI_HOSTNAME);
   ArduinoOTA.setPassword(OTA_PASSWORD);
@@ -54,6 +53,38 @@ void setup() {
   debouncer.interval(100);
 
   bootstrapWebServer();
+}
+
+void eepromRead() {
+  uint8_t numSounds = EEPROM.read(EEPROM_NUM_SOUNDS);
+
+  if (numSounds == 0) {
+    return;
+  }
+  
+  sounds.clear();
+
+  char filename[100];
+  for (uint8_t i = 0; i < numSounds; i++) {
+    EEPROM.get(EEPROM_SOUNDS + (i * sizeof(filename)), filename);
+    sounds.push_back(String(filename));
+  }
+}
+
+void eepromWrite() {
+
+  uint8_t numSounds = (uint8_t) sounds.size();
+  if (numSounds == 0) {
+    return;  
+  }
+  
+  EEPROM.write(EEPROM_NUM_SOUNDS, numSounds);  
+
+  char filename[100];
+  for (uint8_t i = 0; i < numSounds; i++) {
+    sounds[i].toCharArray(filename, sizeof(filename));
+    EEPROM.put(EEPROM_SOUNDS + (i * sizeof(filename)), filename);
+  }
 }
 
 void handleRoot() {
@@ -121,9 +152,26 @@ void handleDelete() {
   webServer.send(301, "text/plain", "Sound deleted"); 
 }
 
+void handleStore() {
+  eepromWrite();
+  
+  webServer.sendHeader("Location", "/");
+  webServer.send(301, "text/plain", "Stored to EEPROM"); 
+}
+
+void handleLoad() {
+  eepromRead();
+  
+  webServer.sendHeader("Location", "/");
+  webServer.send(301, "text/plain", "Loaded from EEPROM"); 
+}
 
 void bootstrapWebServer() {
   webServer.on("/", handleRoot);
+
+  webServer.on("/store", handleStore);
+  webServer.on("/load", handleLoad);
+ 
   webServer.on("/files", handleFiles);
   webServer.on("/add", handleAdd);
   webServer.on("/delete", handleDelete);
