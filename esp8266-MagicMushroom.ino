@@ -25,15 +25,18 @@ void bootstrapWebServer(void);
 
 void setup() {
 
+  Serial.begin(115200);
+  delay(10);
+
+  EEPROM.begin(EEPROM_SIZE);
+  
   WiFi.hostname(WIFI_HOSTNAME);
   WiFi.mode(WIFI_STA);
 
   eepromRead();
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  
-  Serial.begin(115200);
-  delay(10);
+ 
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -41,7 +44,7 @@ void setup() {
     Serial.print(".");
     delay(500);
   }
-  
+
   mqttClient.setClient(wifiClient);
   mqttClient.setServer(MQTT_HOST, 1883);
   
@@ -56,17 +59,28 @@ void setup() {
 }
 
 void eepromRead() {
-  uint8_t numSounds = EEPROM.read(EEPROM_NUM_SOUNDS);
 
+  if (EEPROM.read(EEPROM_IDX_DIRTY) != 0x42) {    
+    for(uint16_t i = 0; i < EEPROM_SIZE; i++) {
+      EEPROM.write(i, 0x00);
+    }
+    
+    EEPROM.write(EEPROM_IDX_DIRTY, 0x42);
+    EEPROM.commit();
+  }
+  
+  uint8_t numSounds = EEPROM.read(EEPROM_IDX_NUM_SOUNDS);
   if (numSounds == 0) {
     return;
   }
   
   sounds.clear();
 
-  char filename[100];
+  char filename[MAX_FILENAME_LENGTH];
   for (uint8_t i = 0; i < numSounds; i++) {
-    EEPROM.get(EEPROM_SOUNDS + (i * sizeof(filename)), filename);
+    uint16_t address = (EEPROM_SOUNDS + (i * MAX_FILENAME_LENGTH)) + 1;    
+    EEPROM.get(address, filename);
+    
     sounds.push_back(String(filename));
   }
 }
@@ -77,14 +91,18 @@ void eepromWrite() {
   if (numSounds == 0) {
     return;  
   }
-  
-  EEPROM.write(EEPROM_NUM_SOUNDS, numSounds);  
 
-  char filename[100];
+  EEPROM.write(EEPROM_IDX_NUM_SOUNDS, numSounds);
+
+  char filename[MAX_FILENAME_LENGTH];
   for (uint8_t i = 0; i < numSounds; i++) {
+    uint16_t address = (EEPROM_SOUNDS + (i * MAX_FILENAME_LENGTH)) + 1;
     sounds[i].toCharArray(filename, sizeof(filename));
-    EEPROM.put(EEPROM_SOUNDS + (i * sizeof(filename)), filename);
+    
+    EEPROM.put(address, filename);
   }
+  
+  EEPROM.commit();
 }
 
 void handleRoot() {

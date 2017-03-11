@@ -40,10 +40,21 @@
 
 		<form action="/add" role="form" method="POST">
 			<table class="table table-condensed table-striped sounds">
+			    <thead>
 				<tr>
 					<th>filename</th>
 					<th width="100">functions</th>
 				</tr>
+			    </thead>
+			    <tbody>
+			    </tbody>
+			    <tfoot>
+				<tr>
+				  <td colspan="2" class="text-right">
+	      			    <a href="/store" class="btn btn-success">Store to EEPROM</a>
+				  </td>
+				</tr>
+			    </tfoot>
 			</table>
 		</form>
 
@@ -54,11 +65,11 @@
 
 	<script>
 		$(function() {
-			var $sounds = $('.sounds');
+			var $sounds = $('.sounds tbody');
 			var $soundTpl = $('<tr><td></td><td><form action="/delete" method="POST"><input type="hidden" name="index"><input type="submit" value="Delete" class="btn btn-danger"></form></td></tr>');
 
 			$.get('/files', function(result) {
-				$('tr > td', $sounds).remove();
+				$('tr', $sounds).remove();
 
 				result.forEach(function(element) {
 					var $tpl = $soundTpl.clone();
