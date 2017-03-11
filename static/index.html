@@ -73,6 +73,9 @@
 
 				result.forEach(function(element) {
 					var $tpl = $soundTpl.clone();
+					var $form = $('form', $tpl);
+					$form.attr('action', appendRandom($form.attr('action')));
+
 					$('td', $tpl).first().text(element.filename);
 					$('input[type="hidden"]', $tpl).attr('value', element.index);
 
@@ -84,6 +87,25 @@
 			    $('.input-filename').autocomplete({
 			      lookup: result
 			    });
+			});
+
+			function appendRandom(url) {
+			  if (url.indexOf('rnd') !== -1) {
+			    return url;
+			  }
+
+			  var glue = (url.indexOf('?') == -1) ? '?' : '&';
+			  return url + glue + 'rnd=' + Math.random();
+			}
+
+			$('a').each(function() {
+                          var href = $(this).attr('href');
+			  $(this).attr('href', appendRandom(href));
+			});
+
+			$('form').each(function() {
+                          var href = $(this).attr('action');
+			  $(this).attr('action', appendRandom(href));
 			});
 		});
 	</script>
